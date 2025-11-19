@@ -2,14 +2,6 @@
 
 API REST desarrollada con NestJS para gestionar países y planes de viaje, utilizando RestCountries como fuente externa de datos de países con sistema de caché local.
 
-## Descripción
-
-Esta API permite:
-
-- Consumir información de países desde la API externa RestCountries
-- Almacenar esos países en una base de datos local a manera de caché
-- Crear y gestionar planes de viaje asociados a países específicos
-- Implementar arquitectura modular con separación de responsabilidades
 
 ## Módulos
 
@@ -39,7 +31,7 @@ npm i
 ```
 
 
-### Ejecutar la API
+3.  Ejecutar la API
 
 ```bash
 npm run start:dev
@@ -47,7 +39,7 @@ npm run start:dev
 
 La API estará disponible en: `http://localhost:3000`
 
-## Documentación de Endpoints
+## Endpoints
 
 ### Módulo de Países (Countries)
 
