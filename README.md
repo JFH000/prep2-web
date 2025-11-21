@@ -46,7 +46,23 @@ La API estará disponible en: `http://localhost:3000`
 #### `GET /countries`
 Lista todos los países almacenados.
 
-
+**Respuesta exitosa (200):**
+```json
+[
+  {
+    "alpha3Code": "JPN",
+    "name": "Japan",
+    "region": "Asia",
+    "subregion": "Eastern Asia",
+    "capital": "Tokyo",
+    "population": 125836021,
+    "flagUrl": "https://flagcdn.com/w320/jp.png",
+    "createdAt": "2025-11-18T21:00:00.000Z",
+    "updatedAt": "2025-11-18T21:00:00.000Z",
+    "source": "cache"
+  }
+]
+```
 
 #### `GET /countries/:alpha3Code`
 Consulta un país por su código alpha-3.
@@ -55,14 +71,38 @@ Consulta un país por su código alpha-3.
 **Funcionamiento:**
 1. Busca primero en la base de datos local
 2. Si existe, devuelve el país indicando `"source": "cache"`
-3. Si no existe, consulta RestCountries, guarda en la base de datos y devuelve indicando `"source": "external"` (Nota: Durante el parcial no funcionó el API)
+3. Si no existe, consulta RestCountries, guarda en la base de datos y devuelve indicando `"source": "external"`
 
+**Respuesta exitosa (200):**
+```json
+{
+  "alpha3Code": "ESP",
+  "name": "Spain",
+  "region": "Europe",
+  "subregion": "Southern Europe",
+  "capital": "Madrid",
+  "population": 47351567,
+  "flagUrl": "https://flagcdn.com/w320/es.png",
+  "createdAt": "2025-11-18T21:00:00.000Z",
+  "updatedAt": "2025-11-18T21:00:00.000Z",
+  "source": "external"
+}
+```
+
+**Respuesta de error (404):**
+```json
+{
+  "statusCode": 404,
+  "message": "País con código alpha-3 'XXX' no encontrado",
+  "error": "Not Found"
+}
+```
 
 ### Módulo de Planes de Viaje (Travel Plans)
 
 #### `POST /travel-plans`
 
-**Body:**
+**Cuerpo de la petición:**
 ```json
 {
   "alpha3Code": "JPN",
@@ -74,83 +114,71 @@ Consulta un país por su código alpha-3.
 ```
 
 
+**Respuesta exitosa (201):**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "alpha3Code": "JPN",
+  "title": "Aventura en Japón",
+  "startDate": "2025-07-01",
+  "endDate": "2025-07-14",
+  "notes": "Visitar Tokio, Kioto y Osaka",
+  "createdAt": "2025-11-18T21:00:00.000Z"
+}
+```
+
 
 #### `GET /travel-plans`
 Lista todos los planes de viaje registrados.
 
-
+**Respuesta exitosa (200):**
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "alpha3Code": "BRA",
+    "title": "Explorando Brasil",
+    "startDate": "2025-08-10",
+    "endDate": "2025-08-25",
+    "notes": "Conocer Río de Janeiro y São Paulo",
+    "createdAt": "2025-11-18T21:00:00.000Z"
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440001",
+    "alpha3Code": "JPN",
+    "title": "Aventura en Japón",
+    "startDate": "2025-07-01",
+    "endDate": "2025-07-14",
+    "notes": "Visitar Tokio, Kioto y Osaka",
+    "createdAt": "2025-11-18T20:00:00.000Z"
+  }
+]
+```
 
 #### `GET /travel-plans/:id`
 Consulta un plan de viaje específico por su ID.
 
+**Parámetros:**
+- `id` (path): UUID del plan de viaje
 
+**Respuesta exitosa (200):**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "alpha3Code": "JPN",
+  "title": "Aventura en Japón",
+  "startDate": "2025-07-01",
+  "endDate": "2025-07-14",
+  "notes": "Visitar Tokio, Kioto y Osaka",
+  "createdAt": "2025-11-18T21:00:00.000Z"
+}
+```
 
-#### `DELETE /countries/:alpha3Code`
-Elimina un país de la db local. Requiere autenticación mediante header de autorización.
-
-
-**Headers requeridos:**
-- `Authorization: Bearer <token>`
-
-
-## Extensiones de la API
-
-En este parcial, la API fue extendida con tres funcionalidades principales que mejoran la seguridad, el control de acceso y la observabilidad del sistema. Primero, se implemento un endpoint de borrado protegido para países (`DELETE /countries/:alpha3Code`) que permite eliminar países de la caché local con validaciones que impiden el borrado si existen planes de viaje asociados. Segundo, se creó un guard de autorización (`AuthorizationGuard`) que protege operaciones sensibles verificando un token de autorización en el header de las peticiones. Tercero, se implementó un middleware de logging (`LoggingInterceptor`) que registra automáticamente todas las peticiones a las rutas principales, capturando información detallada sobre el método HTTP, la ruta, el código de estado y el tiempo de procesamiento para facilitar el monitoreo y depuración de la aplicación.
-
-
-## Funcionalidades de Seguridad y Logging
-
-### Endpoint Protegido: DELETE /countries/:alpha3Code
-
-#### Funcionamiento
-
-El endpoint `DELETE /countries/:alpha3Code` permite eliminar un país de la caché local después de realizar varias validaciones:
-
-1. **Verificación de existencia**: Verifica que el país existe en la db local. Si no existe, retorna un error `404 Not Found`.
-
-2. **Validación de dependencias**: Verifica si existen planes de viaje asociados al país. Si encuentra planes asociados, lanza un error `400 Bad Request` indicando cuántos planes están relacionados con ese país, impidiendo el borrado
-
-3. **Autenticación**: Requiere un header `Authorization` con un token válido. El guard `AuthorizationGuard` valida el token antes de permitir la ejecución del endpoint.
-
-4. **Eliminación**: Solo si todas las validaciones pasan, elimina el país de la base de datos y retorna `204 No Content`.
-
-
-### Guard de Autorización
-
-
-El `AuthorizationGuard` es un guard personalizado que implementa la interfaz `CanActivate` de NestJS. Su funcionamiento es:
-
-1. **Extracción del header**: Obtiene el header `Authorization` de la petición HTTP.
-
-2. **Validación de presencia**: Verifica que el header esté presente y sea una cadena válida. Si no existe o es inválido, lanza una excepción `401 Unauthorized`.
-
-3. **Extracción del token**: Extrae el token del formato `Bearer <token>`, eliminando el prefijo "Bearer " y espacios en blanco.
-
-4. **Validación del token**: Compara el token extraído con un token válido configurado. El token válido puede ser:
-   - Definido mediante la variable de entorno `AUTHORIZATION_TOKEN`
-   - O usa el valor por defecto `web-token` si no está configurada la variable de entorno
-
-5. **Decisión de acceso**: Si el token coincide, permite el acceso (`return true`). Si no coincide, lanza `401 Unauthorized`.
-
-El guard se aplica al endpoint `DELETE /countries/:alpha3Code` mediante el decorador `@UseGuards(AuthorizationGuard)`, asegurando que solo las operaciones de borrado requieran autenticación.
-
-### Middleware de Logging
-
-
-El `LoggingInterceptor` es un interceptor de NestJS que registra automáticamente la actividad de la API. Su funcionamiento incluye:
-
-1. **Intercepción de peticiones**: Se ejecuta antes y después de cada petición HTTP a las rutas protegidas (`/countries` y `/travel-plans`).
-
-2. **Medición de tiempo**: Registra el tiempo de inicio de la petición usando `Date.now()` antes de procesarla, y calcula la duración total después de completarse.
-
-3. **Captura de información**: Extrae de cada petición:
-   - **Método HTTP**: GET, POST, DELETE, etc.
-   - **Ruta solicitada**: La ruta completa (ej: `/countries/JPN`, `/travel-plans`)
-   - **Código de estado**: El código HTTP de la respuesta (200, 201, 404, 401, etc.)
-   - **Tiempo de procesamiento**: Duración en milisegundos
-
-4. **Manejo de errores**: También captura información de peticiones que resultan en errores, obteniendo el código de estado de la excepción HTTP.
-
-5. **Registro en consola**: Imprime la información
-
-El interceptor se aplica a los controladores mediante `@UseInterceptors(LoggingInterceptor)` en los controladores `CountriesController` y `TravelPlansController`, asegurando que todas las peticiones a estas rutas sean registradas.
+**Respuesta de error (404):**
+```json
+{
+  "statusCode": 404,
+  "message": "Plan de viaje con ID '...' no encontrado",
+  "error": "Not Found"
+}
+```
