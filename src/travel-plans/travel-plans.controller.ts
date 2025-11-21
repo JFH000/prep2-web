@@ -6,12 +6,15 @@ import {
   Param,
   UsePipes,
   ValidationPipe,
+  UseInterceptors,
 } from '@nestjs/common';
 import { TravelPlansService } from './travel-plans.service';
 import { CreateTravelPlanDto } from './dto/create-travel-plan.dto';
 import { TravelPlanResponseDto } from './dto/travel-plan-response.dto';
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 
 @Controller('travel-plans')
+@UseInterceptors(LoggingInterceptor)
 export class TravelPlansController {
   constructor(private readonly travelPlansService: TravelPlansService) {}
 
