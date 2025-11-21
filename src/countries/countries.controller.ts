@@ -6,12 +6,15 @@ import {
   HttpStatus,
   Param,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CountriesService } from './countries.service';
 import { CountryResponseDto } from './dto/country-response.dto';
 import { AuthorizationGuard } from './guards/authorization.guard';
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 
 @Controller('countries')
+@UseInterceptors(LoggingInterceptor)
 export class CountriesController {
   constructor(private readonly countriesService: CountriesService) {}
 
