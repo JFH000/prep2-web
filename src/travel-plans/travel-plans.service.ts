@@ -21,7 +21,6 @@ export class TravelPlansService {
   async create(
     createTravelPlanDto: CreateTravelPlanDto,
   ): Promise<TravelPlanResponseDto> {
-    // Validar que las fechas sean correctas
     const startDate = new Date(createTravelPlanDto.startDate);
     const endDate = new Date(createTravelPlanDto.endDate);
 
@@ -35,7 +34,6 @@ export class TravelPlansService {
       );
     }
 
-    // Verificar que el país existe (si no existe, se solicitará a través del módulo de países)
     try {
       await this.countriesService.ensureCountryExists(
         createTravelPlanDto.alpha3Code.toUpperCase(),
@@ -49,7 +47,6 @@ export class TravelPlansService {
       throw error;
     }
 
-    // Crear el plan de viaje
     const travelPlan = this.travelPlanRepository.create({
       alpha3Code: createTravelPlanDto.alpha3Code.toUpperCase(),
       title: createTravelPlanDto.title,
