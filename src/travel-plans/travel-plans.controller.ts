@@ -1,22 +1,22 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
   Param,
-  UsePipes,
-  ValidationPipe,
+  Post,
+  UseInterceptors,
 } from '@nestjs/common';
-import { TravelPlansService } from './travel-plans.service';
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { CreateTravelPlanDto } from './dto/create-travel-plan.dto';
 import { TravelPlanResponseDto } from './dto/travel-plan-response.dto';
+import { TravelPlansService } from './travel-plans.service';
 
 @Controller('travel-plans')
+@UseInterceptors(LoggingInterceptor)
 export class TravelPlansController {
   constructor(private readonly travelPlansService: TravelPlansService) {}
 
   @Post()
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async create(
     @Body() createTravelPlanDto: CreateTravelPlanDto,
   ): Promise<TravelPlanResponseDto> {
