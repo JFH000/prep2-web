@@ -1,14 +1,14 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TravelPlan } from './entities/travel-plan.entity';
+import { CountriesService } from '../countries/countries.service';
 import { CreateTravelPlanDto } from './dto/create-travel-plan.dto';
 import { TravelPlanResponseDto } from './dto/travel-plan-response.dto';
-import { CountriesService } from '../countries/countries.service';
+import { TravelPlan } from './entities/travel-plan.entity';
 
 @Injectable()
 export class TravelPlansService {
@@ -76,5 +76,11 @@ export class TravelPlansService {
     }
 
     return TravelPlanResponseDto.fromEntity(travelPlan);
+  }
+
+  async countByAlpha3Code(alpha3Code: string): Promise<number> {
+    return this.travelPlanRepository.count({
+      where: { alpha3Code: alpha3Code.toUpperCase() },
+    });
   }
 }
