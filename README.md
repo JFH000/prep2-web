@@ -178,7 +178,7 @@ Consulta un plan de viaje específico por su ID.
 ```json
 {
   "statusCode": 404,
-  "message": "Plan de viaje con ID 'xxx' no encontrado",
+  "message": "Plan de viaje con ID '...' no encontrado",
   "error": "Not Found"
 }
 ```
