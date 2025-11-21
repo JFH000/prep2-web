@@ -78,27 +78,7 @@ Consulta un plan de viaje específico por su ID.
 **Parámetros:**
 - `id` (path): UUID del plan de viaje
 
-**Respuesta exitosa (200):**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "alpha3Code": "JPN",
-  "title": "Aventura en Japón",
-  "startDate": "2025-07-01",
-  "endDate": "2025-07-14",
-  "notes": "Visitar Tokio, Kioto y Osaka",
-  "createdAt": "2025-11-18T21:00:00.000Z"
-}
-```
 
-**Respuesta de error (404):**
-```json
-{
-  "statusCode": 404,
-  "message": "Plan de viaje con ID '...' no encontrado",
-  "error": "Not Found"
-}
-```
 
 #### `DELETE /countries/:alpha3Code`
 Elimina un país de la caché local. Requiere autenticación.
