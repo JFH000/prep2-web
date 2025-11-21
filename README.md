@@ -17,25 +17,18 @@ Módulo encargado de gestionar planes de viaje, permitiendo crear y consultar pl
 
 ## Cómo ejecutar el proyecto
 
-### Instalación
 
-1. Clonar:
 ```bash
 git clone https://github.com/JFH000/prep2-web
 cd prep2-web
-```
-
-2. Instalar dependencias:
-```bash
 npm i
-```
-
-
-3.  Ejecutar la API
-
-```bash
 npm run start:dev
 ```
+
+
+
+
+
 
 La API estará disponible en: `http://localhost:3000`
 
@@ -46,23 +39,7 @@ La API estará disponible en: `http://localhost:3000`
 #### `GET /countries`
 Lista todos los países almacenados.
 
-**Respuesta exitosa (200):**
-```json
-[
-  {
-    "alpha3Code": "JPN",
-    "name": "Japan",
-    "region": "Asia",
-    "subregion": "Eastern Asia",
-    "capital": "Tokyo",
-    "population": 125836021,
-    "flagUrl": "https://flagcdn.com/w320/jp.png",
-    "createdAt": "2025-11-18T21:00:00.000Z",
-    "updatedAt": "2025-11-18T21:00:00.000Z",
-    "source": "cache"
-  }
-]
-```
+
 
 #### `GET /countries/:alpha3Code`
 Consulta un país por su código alpha-3.
@@ -73,30 +50,6 @@ Consulta un país por su código alpha-3.
 2. Si existe, devuelve el país indicando `"source": "cache"`
 3. Si no existe, consulta RestCountries, guarda en la base de datos y devuelve indicando `"source": "external"`
 
-**Respuesta exitosa (200):**
-```json
-{
-  "alpha3Code": "ESP",
-  "name": "Spain",
-  "region": "Europe",
-  "subregion": "Southern Europe",
-  "capital": "Madrid",
-  "population": 47351567,
-  "flagUrl": "https://flagcdn.com/w320/es.png",
-  "createdAt": "2025-11-18T21:00:00.000Z",
-  "updatedAt": "2025-11-18T21:00:00.000Z",
-  "source": "external"
-}
-```
-
-**Respuesta de error (404):**
-```json
-{
-  "statusCode": 404,
-  "message": "País con código alpha-3 'XXX' no encontrado",
-  "error": "Not Found"
-}
-```
 
 ### Módulo de Planes de Viaje (Travel Plans)
 
@@ -114,46 +67,10 @@ Consulta un país por su código alpha-3.
 ```
 
 
-**Respuesta exitosa (201):**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "alpha3Code": "JPN",
-  "title": "Aventura en Japón",
-  "startDate": "2025-07-01",
-  "endDate": "2025-07-14",
-  "notes": "Visitar Tokio, Kioto y Osaka",
-  "createdAt": "2025-11-18T21:00:00.000Z"
-}
-```
 
 
 #### `GET /travel-plans`
 Lista todos los planes de viaje registrados.
-
-**Respuesta exitosa (200):**
-```json
-[
-  {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "alpha3Code": "BRA",
-    "title": "Explorando Brasil",
-    "startDate": "2025-08-10",
-    "endDate": "2025-08-25",
-    "notes": "Conocer Río de Janeiro y São Paulo",
-    "createdAt": "2025-11-18T21:00:00.000Z"
-  },
-  {
-    "id": "660e8400-e29b-41d4-a716-446655440001",
-    "alpha3Code": "JPN",
-    "title": "Aventura en Japón",
-    "startDate": "2025-07-01",
-    "endDate": "2025-07-14",
-    "notes": "Visitar Tokio, Kioto y Osaka",
-    "createdAt": "2025-11-18T20:00:00.000Z"
-  }
-]
-```
 
 #### `GET /travel-plans/:id`
 Consulta un plan de viaje específico por su ID.
@@ -182,3 +99,45 @@ Consulta un plan de viaje específico por su ID.
   "error": "Not Found"
 }
 ```
+
+#### `DELETE /countries/:alpha3Code`
+Elimina un país de la caché local. Requiere autenticación.
+
+**Headers requeridos:**
+- `Authorization: Bearer web-token`
+
+
+Errores:
+- `401 Unauthorized`: Token faltante o inválido
+- `404 Not Found`: País no existe
+- `400 Bad Request`: País tiene planes de viaje asociados
+
+---
+
+## Extensiones de la API
+
+En este parcial, la API fue extendida con tres funcionalidades principales: un endpoint protegido para borrar países, un guard de autorización que valida tokens, y un middleware de logging que registra todas las peticiones. El endpoint `DELETE /countries/:alpha3Code` permite eliminar países de la caché, pero requiere un token válido y verifica que no existan planes de viaje asociados antes de permitir el borrado.
+
+El guard `AuthorizationGuard` protege el endpoint de borrado verificando que la petición incluya un header `Authorization` con un token válido. El middleware `LoggingInterceptor` registra automáticamente todas las peticiones a las rutas `/countries` y `/travel-plans`, mostrando en consola el método HTTP, la ruta, el código de estado y el tiempo de procesamiento. 
+
+---
+
+## Funcionalidades de Seguridad y Logging
+
+### Endpoint Protegido: DELETE /countries/:alpha3Code
+
+1. Verifica que el país existe en la base de datos
+2. Comprueba que no tenga planes de viaje asociados
+3. Valida el token de autorización mediante el guard
+4. Si todo es correcto, elimina el país
+
+
+### Guard de Autorización
+
+El `AuthorizationGuard` verifica que la petición incluya el header `Authorization` con formato `Bearer <token>`. Compara el token con el valor configurado (por defecto: `web-token`) y solo permite el acceso si coincide.
+
+
+### Middleware de Logging
+
+El `LoggingInterceptor` registra automáticamente todas las peticiones a `/countries` y `/travel-plans`. Para cada petición muestra en consola: el timestamp, el método HTTP (GET, POST, DELETE), la ruta, el código de estado y el tiempo de procesamiento en milisegundos.
+
